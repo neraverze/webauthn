@@ -1,0 +1,145 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WebAuthn Login Demo</title>
+
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #0f172a;
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .container {
+                width: 90%;
+                max-width: 400px;
+                background: #1e293b;
+                padding: 20px;
+                border-radius: 16px;
+                text-align: center;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+            }
+            h2 {
+                margin-bottom: 20px;
+            }
+            button {
+                width: 100%;
+                padding: 12px;
+                margin: 10px 0;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+            .register {
+                background: #22c55e;
+            }
+            .login {
+                background: #3b82f6;
+            }
+            .status {
+                margin-top: 15px;
+                font-size: 14px;
+                color: #94a3b8;
+                word-wrap: break-word;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <h2>🔐 WebAuthn Demo</h2>
+            <button class="register" onclick="register()">
+                Register Fingerprint
+            </button>
+            <button class="login" onclick="login()">
+                Login with Fingerprint
+            </button>
+            <div class="status" id="status">Status: Waiting...</div>
+        </div>
+
+        <script>
+            let credentialId = null;
+
+            function bufferToBase64(buf) {
+                return btoa(String.fromCharCode(...new Uint8Array(buf)));
+            }
+
+            function base64ToBuffer(base64) {
+                return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+            }
+
+            async function register() {
+                try {
+                    const publicKey = {
+                        challenge: new Uint8Array(32),
+                        rp: { name: "Demo App" },
+                        user: {
+                            id: new Uint8Array(16),
+                            name: "user@example.com",
+                            displayName: "Demo User",
+                        },
+                        pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                        authenticatorSelection: {
+                            authenticatorAttachment: "platform",
+                            userVerification: "required",
+                        },
+                        timeout: 60000,
+                        attestation: "none",
+                    };
+
+                    const cred = await navigator.credentials.create({
+                        publicKey,
+                    });
+
+                    credentialId = bufferToBase64(cred.rawId);
+
+                    document.getElementById("status").innerText =
+                        "✅ Registered successfully!";
+                } catch (err) {
+                    document.getElementById("status").innerText =
+                        "❌ Registration failed: " + err.message;
+                }
+            }
+
+            async function login() {
+                if (!credentialId) {
+                    document.getElementById("status").innerText =
+                        "⚠️ Register first!";
+                    return;
+                }
+
+                try {
+                    const publicKey = {
+                        challenge: new Uint8Array(32),
+                        allowCredentials: [
+                            {
+                                id: base64ToBuffer(credentialId),
+                                type: "public-key",
+                            },
+                        ],
+                        userVerification: "required",
+                        timeout: 60000,
+                    };
+
+                    const assertion = await navigator.credentials.get({
+                        publicKey,
+                    });
+
+                    document.getElementById("status").innerText =
+                        "✅ Login successful!";
+                } catch (err) {
+                    document.getElementById("status").innerText =
+                        "❌ Login failed: " + err.message;
+                }
+            }
+        </script>
+    </body>
+</html>
