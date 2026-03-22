@@ -55,7 +55,7 @@
 
     <body>
         <div class="container">
-            <h2>🔐 WebAuthn Demo</h2>
+            <h2> WebAuthn Demo</h2>
             <button class="register" onclick="register()">
                 Register Fingerprint
             </button>
@@ -136,7 +136,7 @@
                     });
 
                     document.getElementById("status").innerText =
-                        "✅ Login successful!";
+                        "✅ Login successful!" + " " + credentialId;
                     console.log(credentialId);
                 } catch (err) {
                     document.getElementById("status").innerText =
