@@ -102,7 +102,9 @@
                     credentialId = bufferToBase64(cred.rawId);
 
                     document.getElementById("status").innerText =
-                        "✅ Registered successfully!";
+                        "✅ Registered successfully!" + " " + credentialId;
+                    console.log(credentialId);
+                    console.log(cred.rawId);
                 } catch (err) {
                     document.getElementById("status").innerText =
                         "❌ Registration failed: " + err.message;
@@ -135,6 +137,7 @@
 
                     document.getElementById("status").innerText =
                         "✅ Login successful!";
+                    console.log(credentialId);
                 } catch (err) {
                     document.getElementById("status").innerText =
                         "❌ Login failed: " + err.message;
